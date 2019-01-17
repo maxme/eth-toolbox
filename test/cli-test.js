@@ -1,6 +1,5 @@
 import Web3 from 'web3';
 import toolbox from '../src/index';
-import FileCacheManager from '../src/FileCacheManager';
 import config from '../config';
 
 const web3 = new Web3(
@@ -12,7 +11,7 @@ async function main() {
   toolbox.setup(web3);
   const logs = await toolbox.logs.getAllLogsForAddress(
     address,
-    new FileCacheManager(`${address}-logs.cache`),
+    new toolbox.cache.FileCacheManager(`${address}-logs.cache`),
   );
   console.log(Object.keys(logs));
 }
