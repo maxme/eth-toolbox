@@ -8,7 +8,7 @@ const web3 = new Web3(
 
 async function main() {
   const address = '0xe083515D1541F2a9Fd0ca03f189F5D321C73B872';
-  toolbox.setup(web3);
+  toolbox.setup(web3, { chunkSize: 1000 });
   const logs = await toolbox.logs.getAllLogsForAddress(
     address,
     new toolbox.cache.FileCacheManager(`${address}-logs.cache`),

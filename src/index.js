@@ -1,7 +1,10 @@
 import getAllLogsForAddress from './getLogs';
 import FileCacheManager from './FileCacheManager';
 
-function setup(web3) {
+function setup(web3, options) {
+  if (options) {
+    global.toolboxOptions = options;
+  }
   global.web3 = web3;
 }
 
@@ -10,7 +13,7 @@ function getAllLogsForAddressWeb3(address, cache) {
     console.error('Make sure to call web3toolbox.setup(web3) before this function');
     process.exit(1);
   }
-  return getAllLogsForAddress(global.web3, address, cache);
+  return getAllLogsForAddress(global.web3, address, cache, global.toolboxOptions);
 }
 
 export default {

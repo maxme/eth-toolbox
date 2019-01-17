@@ -7,9 +7,8 @@ export default class FileCacheManager {
   }
 
   add(data) {
-    Object.keys(data).map((key) => {
-      this.data[key] = data[key];
-    });
+    // eslint-disable-next-line no-return-assign
+    Object.keys(data).every(key => (this.data[key] = data[key]));
   }
 
   save() {

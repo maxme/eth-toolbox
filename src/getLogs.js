@@ -1,5 +1,3 @@
-import { tmpdir } from 'os';
-
 function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   return new Promise((resolve, reject) => {
     console.log(`Fetching logs from block ${fromBlock} to ${toBlock}`);
@@ -20,17 +18,17 @@ function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   });
 }
 
-export default async function getAllLogsForAddress(web3, address, cache) {
+export default async function getAllLogsForAddress(web3, address, cache, options) {
   let logs = {};
   const blockNumber = await web3.eth.getBlockNumber();
-  const blockChunk = 5000;
+  const chunkSize = options && options.chunkSize ? options.chunkSize : 5000;
   let fromBlock = 1;
   if (cache && cache.data.latestBlock && cache.data.latestBlock > fromBlock) {
     fromBlock = cache.data.latestBlock;
     ({ logs } = cache.data);
   }
   for (let block = fromBlock; block < blockNumber;) {
-    const nextBlock = Math.min(blockNumber, block + blockChunk);
+    const nextBlock = Math.min(blockNumber, block + chunkSize);
     // Disable the eslint check here because in this specific case,
     // we don't want getLogs to be parallelized to avoid hammering the node.
     // eslint-disable-next-line no-await-in-loop

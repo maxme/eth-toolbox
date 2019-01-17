@@ -60,8 +60,5 @@ typings/
 # next.js build output
 .next
 
-# Babel generated files
-dist/
-
 *-logs.cache
 config.js
