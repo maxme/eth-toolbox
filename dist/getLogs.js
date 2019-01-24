@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = getAllLogsForAddress;
 
+var _MemoryCacheManager = _interopRequireDefault(require("./MemoryCacheManager"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -37,31 +41,30 @@ function getAllLogsForAddress(_x, _x2, _x3, _x4) {
 function _getAllLogsForAddress() {
   _getAllLogsForAddress = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(web3, address, cache, options) {
-    var logs, blockNumber, chunkSize, fromBlock, block, nextBlock, currentLogs, timestampInjectedLogs, mappedLogs;
+  regeneratorRuntime.mark(function _callee2(web3, address, _cache, options) {
+    var blockNumber, chunkSize, fromBlock, cache, block, nextBlock, currentLogs, timestampInjectedLogs, mappedLogs;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            logs = {};
-            _context2.next = 3;
+            _context2.next = 2;
             return web3.eth.getBlockNumber();
 
-          case 3:
+          case 2:
             blockNumber = _context2.sent;
             chunkSize = options && options.chunkSize ? options.chunkSize : 5000;
-            fromBlock = 1;
+            fromBlock = options && options.fromBlock ? options.fromBlock : 1;
+            cache = _cache || new _MemoryCacheManager.default();
 
-            if (cache && cache.data.latestBlock && cache.data.latestBlock > fromBlock) {
-              fromBlock = cache.data.latestBlock;
-              logs = cache.data.logs;
+            if (cache.get('latestBlock') && cache.get('latestBlock') > fromBlock) {
+              fromBlock = cache.get('latestBlock');
             }
 
             block = fromBlock;
 
           case 8:
             if (!(block < blockNumber)) {
-              _context2.next = 22;
+              _context2.next = 21;
               break;
             }
 
@@ -117,36 +120,26 @@ function _getAllLogsForAddress() {
               acc[e.id] = e;
               return acc;
             }, {});
-            logs = _objectSpread({}, logs, mappedLogs);
 
             if (cache) {
-              cache.add({
-                logs: logs
-              });
-              cache.add({
-                latestBlock: nextBlock
-              });
+              cache.batchSet(mappedLogs);
+              cache.set('latestBlock', nextBlock);
             }
 
             block = nextBlock;
 
-          case 20:
+          case 19:
             _context2.next = 8;
             break;
 
-          case 22:
-            if (!cache) {
-              _context2.next = 25;
-              break;
-            }
+          case 21:
+            cache.save(); // trick to remove latestBlock from logs before returning,
+            // TODO: use hset/hget
 
-            cache.save();
-            return _context2.abrupt("return", cache.data.logs);
+            cache.set('latestBlock', null);
+            return _context2.abrupt("return", cache.getAll());
 
-          case 25:
-            return _context2.abrupt("return", logs);
-
-          case 26:
+          case 24:
           case "end":
             return _context2.stop();
         }

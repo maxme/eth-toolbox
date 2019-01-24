@@ -1,3 +1,5 @@
+import MemoryCacheManager from './MemoryCacheManager';
+
 function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   return new Promise((resolve, reject) => {
     console.log(`Fetching logs from block ${fromBlock} to ${toBlock}`);
@@ -18,14 +20,13 @@ function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   });
 }
 
-export default async function getAllLogsForAddress(web3, address, cache, options) {
-  let logs = {};
+export default async function getAllLogsForAddress(web3, address, _cache, options) {
   const blockNumber = await web3.eth.getBlockNumber();
   const chunkSize = options && options.chunkSize ? options.chunkSize : 5000;
-  let fromBlock = 1;
-  if (cache && cache.data.latestBlock && cache.data.latestBlock > fromBlock) {
-    fromBlock = cache.data.latestBlock;
-    ({ logs } = cache.data);
+  let fromBlock = options && options.fromBlock ? options.fromBlock : 1;
+  const cache = _cache || new MemoryCacheManager();
+  if (cache.get('latestBlock') && cache.get('latestBlock') > fromBlock) {
+    fromBlock = cache.get('latestBlock');
   }
   for (let block = fromBlock; block < blockNumber;) {
     const nextBlock = Math.min(blockNumber, block + chunkSize);
@@ -33,6 +34,7 @@ export default async function getAllLogsForAddress(web3, address, cache, options
     // we don't want getLogs to be parallelized to avoid hammering the node.
     // eslint-disable-next-line no-await-in-loop
     const currentLogs = await getLogsFromAddress(web3, address, block, nextBlock);
+    // Inject timestamp to the logs, this is often useful for ordering or analysis
     // eslint-disable-next-line no-await-in-loop
     const timestampInjectedLogs = await Promise.all(
       currentLogs.map(async log => ({
@@ -44,16 +46,15 @@ export default async function getAllLogsForAddress(web3, address, cache, options
       acc[e.id] = e;
       return acc;
     }, {});
-    logs = { ...logs, ...mappedLogs };
     if (cache) {
-      cache.add({ logs });
-      cache.add({ latestBlock: nextBlock });
+      cache.batchSet(mappedLogs);
+      cache.set('latestBlock', nextBlock);
     }
     block = nextBlock;
   }
-  if (cache) {
-    cache.save();
-    return cache.data.logs;
-  }
-  return logs;
+  cache.save();
+  // trick to remove latestBlock from logs before returning,
+  // TODO: use hset/hget
+  cache.set('latestBlock', null);
+  return cache.getAll();
 }

@@ -5,27 +5,22 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _fs = _interopRequireDefault(require("fs"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var FileCacheManager =
+var MemoryCacheManager =
 /*#__PURE__*/
 function () {
-  function FileCacheManager(filename) {
-    _classCallCheck(this, FileCacheManager);
+  function MemoryCacheManager() {
+    _classCallCheck(this, MemoryCacheManager);
 
-    this.filename = filename;
-    this.data = this.read();
+    this.data = {};
   }
 
-  _createClass(FileCacheManager, [{
+  _createClass(MemoryCacheManager, [{
     key: "batchSet",
     value: function batchSet(dataset) {
       var _this = this;
@@ -48,20 +43,16 @@ function () {
     key: "get",
     value: function get(key) {
       return this.data[key];
-    }
+    } // eslint-disable-next-line class-methods-use-this
+
   }, {
     key: "save",
-    value: function save() {
-      _fs.default.writeFileSync(this.filename, JSON.stringify(this.data));
-    }
+    value: function save() {} // noop
+    // eslint-disable-next-line class-methods-use-this
+
   }, {
     key: "read",
-    value: function read() {
-      if (!_fs.default.existsSync(this.filename)) {
-        _fs.default.writeFileSync(this.filename, JSON.stringify({}));
-      }
-
-      return JSON.parse(_fs.default.readFileSync(this.filename));
+    value: function read() {// noop
     }
   }, {
     key: "getAll",
@@ -70,7 +61,7 @@ function () {
     }
   }]);
 
-  return FileCacheManager;
+  return MemoryCacheManager;
 }();
 
-exports.default = FileCacheManager;
+exports.default = MemoryCacheManager;

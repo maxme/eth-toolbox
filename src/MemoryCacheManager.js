@@ -1,9 +1,6 @@
-import fs from 'fs';
-
-export default class FileCacheManager {
-  constructor(filename) {
-    this.filename = filename;
-    this.data = this.read();
+export default class MemoryCacheManager {
+  constructor() {
+    this.data = {};
   }
 
   batchSet(dataset) {
@@ -22,15 +19,14 @@ export default class FileCacheManager {
     return this.data[key];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   save() {
-    fs.writeFileSync(this.filename, JSON.stringify(this.data));
+    // noop
   }
 
+  // eslint-disable-next-line class-methods-use-this
   read() {
-    if (!fs.existsSync(this.filename)) {
-      fs.writeFileSync(this.filename, JSON.stringify({}));
-    }
-    return JSON.parse(fs.readFileSync(this.filename));
+    // noop
   }
 
   getAll() {
