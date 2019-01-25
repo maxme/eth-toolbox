@@ -1,5 +1,6 @@
 import getAllLogsForAddress from './getLogs';
 import FileCacheManager from './FileCacheManager';
+import RedisCacheManager from './RedisCacheManager';
 
 function setup(web3, options) {
   if (options) {
@@ -19,5 +20,5 @@ function getAllLogsForAddressWeb3(address, cache) {
 export default {
   setup,
   logs: { getAllLogsForAddress: getAllLogsForAddressWeb3 },
-  cache: { FileCacheManager },
+  cache: { FileCacheManager, RedisCacheManager },
 };

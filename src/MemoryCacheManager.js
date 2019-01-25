@@ -29,7 +29,7 @@ export default class MemoryCacheManager {
     // noop
   }
 
-  getAll() {
+  async getAll() {
     return this.data;
   }
 }

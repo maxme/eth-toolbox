@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.cacheLogsForAddress = cacheLogsForAddress;
 exports.default = getAllLogsForAddress;
 
 var _MemoryCacheManager = _interopRequireDefault(require("./MemoryCacheManager"));
@@ -34,15 +35,15 @@ function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   });
 }
 
-function getAllLogsForAddress(_x, _x2, _x3, _x4) {
-  return _getAllLogsForAddress.apply(this, arguments);
+function cacheLogsForAddress(_x, _x2, _x3, _x4) {
+  return _cacheLogsForAddress.apply(this, arguments);
 }
 
-function _getAllLogsForAddress() {
-  _getAllLogsForAddress = _asyncToGenerator(
+function _cacheLogsForAddress() {
+  _cacheLogsForAddress = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(web3, address, _cache, options) {
-    var blockNumber, chunkSize, fromBlock, cache, block, nextBlock, currentLogs, timestampInjectedLogs, mappedLogs;
+  regeneratorRuntime.mark(function _callee2(web3, address, cache, options) {
+    var blockNumber, injectTimestamp, chunkSize, fromBlock, latestBlock, block, nextBlock, currentLogs, logs, mappedLogs;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -52,19 +53,34 @@ function _getAllLogsForAddress() {
 
           case 2:
             blockNumber = _context2.sent;
+            injectTimestamp = options && options.injectTimestamp ? options.injectTimestamp : false;
             chunkSize = options && options.chunkSize ? options.chunkSize : 5000;
             fromBlock = options && options.fromBlock ? options.fromBlock : 1;
-            cache = _cache || new _MemoryCacheManager.default();
+            _context2.next = 8;
+            return cache.get('latestBlock');
 
-            if (cache.get('latestBlock') && cache.get('latestBlock') > fromBlock) {
-              fromBlock = cache.get('latestBlock');
+          case 8:
+            _context2.t0 = _context2.sent;
+
+            if (_context2.t0) {
+              _context2.next = 11;
+              break;
+            }
+
+            _context2.t0 = 1;
+
+          case 11:
+            latestBlock = _context2.t0;
+
+            if (latestBlock > fromBlock) {
+              fromBlock = latestBlock;
             }
 
             block = fromBlock;
 
-          case 8:
+          case 14:
             if (!(block < blockNumber)) {
-              _context2.next = 21;
+              _context2.next = 29;
               break;
             }
 
@@ -72,12 +88,20 @@ function _getAllLogsForAddress() {
             // we don't want getLogs to be parallelized to avoid hammering the node.
             // eslint-disable-next-line no-await-in-loop
 
-            _context2.next = 12;
+            _context2.next = 18;
             return getLogsFromAddress(web3, address, block, nextBlock);
 
-          case 12:
+          case 18:
             currentLogs = _context2.sent;
-            _context2.next = 15;
+            // Inject timestamp to the logs, this is often useful for ordering or analysis
+            logs = currentLogs;
+
+            if (!injectTimestamp) {
+              _context2.next = 24;
+              break;
+            }
+
+            _context2.next = 23;
             return Promise.all(currentLogs.map(
             /*#__PURE__*/
             function () {
@@ -109,14 +133,16 @@ function _getAllLogsForAddress() {
                 }, _callee, this);
               }));
 
-              return function (_x5) {
+              return function (_x9) {
                 return _ref.apply(this, arguments);
               };
             }()));
 
-          case 15:
-            timestampInjectedLogs = _context2.sent;
-            mappedLogs = timestampInjectedLogs.reduce(function (acc, e) {
+          case 23:
+            logs = _context2.sent;
+
+          case 24:
+            mappedLogs = logs.reduce(function (acc, e) {
               acc[e.id] = e;
               return acc;
             }, {});
@@ -128,23 +154,49 @@ function _getAllLogsForAddress() {
 
             block = nextBlock;
 
-          case 19:
-            _context2.next = 8;
+          case 27:
+            _context2.next = 14;
             break;
 
-          case 21:
-            cache.save(); // trick to remove latestBlock from logs before returning,
-            // TODO: use hset/hget
+          case 29:
+            cache.save();
 
-            cache.set('latestBlock', null);
-            return _context2.abrupt("return", cache.getAll());
-
-          case 24:
+          case 30:
           case "end":
             return _context2.stop();
         }
       }
     }, _callee2, this);
+  }));
+  return _cacheLogsForAddress.apply(this, arguments);
+}
+
+function getAllLogsForAddress(_x5, _x6, _x7, _x8) {
+  return _getAllLogsForAddress.apply(this, arguments);
+}
+
+function _getAllLogsForAddress() {
+  _getAllLogsForAddress = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3(web3, address, _cache, options) {
+    var cache;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            cache = _cache || new _MemoryCacheManager.default();
+            _context3.next = 3;
+            return cacheLogsForAddress(web3, address, cache, options);
+
+          case 3:
+            return _context3.abrupt("return", cache.getAll());
+
+          case 4:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, this);
   }));
   return _getAllLogsForAddress.apply(this, arguments);
 }

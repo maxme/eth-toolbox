@@ -9,6 +9,8 @@ var _getLogs = _interopRequireDefault(require("./getLogs"));
 
 var _FileCacheManager = _interopRequireDefault(require("./FileCacheManager"));
 
+var _RedisCacheManager = _interopRequireDefault(require("./RedisCacheManager"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function setup(web3, options) {
@@ -34,7 +36,8 @@ var _default = {
     getAllLogsForAddress: getAllLogsForAddressWeb3
   },
   cache: {
-    FileCacheManager: _FileCacheManager.default
+    FileCacheManager: _FileCacheManager.default,
+    RedisCacheManager: _RedisCacheManager.default
   }
 };
 exports.default = _default;

@@ -33,7 +33,7 @@ export default class FileCacheManager {
     return JSON.parse(fs.readFileSync(this.filename));
   }
 
-  getAll() {
+  async getAll() {
     return this.data;
   }
 }

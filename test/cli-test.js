@@ -7,13 +7,19 @@ const web3 = new Web3(
 );
 
 async function main() {
-  const address = '0xe083515D1541F2a9Fd0ca03f189F5D321C73B872';
-  toolbox.setup(web3, { chunkSize: 1000 });
-  const logs = await toolbox.logs.getAllLogsForAddress(
-    address,
-    new toolbox.cache.FileCacheManager(`${address}-logs.cache`),
-  );
-  console.log(Object.keys(logs));
+  // CK: 0x06012c8cf97bead5deae237070f9587f8e7a266d
+  // fizzy: 0xe083515D1541F2a9Fd0ca03f189F5D321C73B872
+  const address = '0x06012c8cf97bead5deae237070f9587f8e7a266d';
+  toolbox.setup(web3, { chunkSize: 1000, fromBlock: 7000001, injectTimestamp: false });
+  const cache = new toolbox.cache.RedisCacheManager(address);
+  // const cache = new toolbox.cache.FileCacheManager(address)
+  try {
+    const logs = await toolbox.logs.getAllLogsForAddress(address, cache);
+    console.log(Object.keys(logs));
+  } catch (error) {
+    console.log(error);
+  }
+  cache.close();
 }
 
 main();

@@ -36,5 +36,7 @@
     "preversion": "yarn lint && yarn test && yarn build",
     "prepublish": "yarn lint && yarn test && yarn build"
   },
-  "dependencies": {}
+  "dependencies": {
+    "redis": "^2.8.0"
+  }
 }
