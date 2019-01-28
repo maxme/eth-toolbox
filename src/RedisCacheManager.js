@@ -14,7 +14,10 @@ export default class RedisCacheManager {
 
   batchSet(dataset) {
     // TODO: remove stringify, could be done easily if we're sure the object is flat (no sub-object)
-    Object.keys(dataset).every(key => this.client.hset(this.mainkey, key, JSON.stringify(dataset[key])));
+    // eslint-disable-next-line array-callback-return
+    Object.keys(dataset).every((key) => {
+      this.client.hset(this.mainkey, key, JSON.stringify(dataset[key]));
+    });
   }
 
   set(key, data) {
@@ -27,10 +30,12 @@ export default class RedisCacheManager {
     return tmp;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   save() {
     // noop
   }
 
+  // eslint-disable-next-line class-methods-use-this
   read() {
     // noop
   }
@@ -42,9 +47,11 @@ export default class RedisCacheManager {
   async getAll() {
     // TODO: remove parse, this is a terrible way of doing it, see above
     const data = await this.hgetall(this.mainkey);
+    // eslint-disable-next-line no-return-assign
     Object.keys(data).map(key => (data[key] = JSON.parse(data[key])));
     return data;
   }
 
-  // Note for later: leveraging redis zset would be amazing here to iterate over logs sorted by blocknumber / timestamp.
+  // Note for later: leveraging redis zset would be amazing here to
+  // iterate over logs sorted by blocknumber / timestamp.
 }

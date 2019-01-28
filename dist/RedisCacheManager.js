@@ -42,8 +42,9 @@ function () {
       var _this = this;
 
       // TODO: remove stringify, could be done easily if we're sure the object is flat (no sub-object)
+      // eslint-disable-next-line array-callback-return
       Object.keys(dataset).every(function (key) {
-        return _this.client.hset(_this.mainkey, key, JSON.stringify(dataset[key]));
+        _this.client.hset(_this.mainkey, key, JSON.stringify(dataset[key]));
       });
     }
   }, {
@@ -84,11 +85,13 @@ function () {
       }
 
       return get;
-    }()
+    }() // eslint-disable-next-line class-methods-use-this
+
   }, {
     key: "save",
-    value: function save() {// noop
-    }
+    value: function save() {} // noop
+    // eslint-disable-next-line class-methods-use-this
+
   }, {
     key: "read",
     value: function read() {// noop
@@ -114,6 +117,7 @@ function () {
 
               case 2:
                 data = _context2.sent;
+                // eslint-disable-next-line no-return-assign
                 Object.keys(data).map(function (key) {
                   return data[key] = JSON.parse(data[key]);
                 });
@@ -132,7 +136,8 @@ function () {
       }
 
       return getAll;
-    }() // Note for later: leveraging redis zset would be amazing here to iterate over logs sorted by blocknumber / timestamp.
+    }() // Note for later: leveraging redis zset would be amazing here to
+    // iterate over logs sorted by blocknumber / timestamp.
 
   }]);
 
