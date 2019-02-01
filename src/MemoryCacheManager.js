@@ -5,7 +5,7 @@ export default class MemoryCacheManager {
 
   batchSet(dataset) {
     // eslint-disable-next-line no-return-assign
-    Object.keys(dataset).every(key => (this.data[key] = dataset[key]));
+    Object.keys(dataset).forEach(key => (this.data[key] = dataset[key]));
   }
 
   set(key, data) {

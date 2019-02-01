@@ -11,6 +11,14 @@ var _util = require("util");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -34,6 +42,8 @@ function () {
     });
     this.hget = (0, _util.promisify)(this.client.hget).bind(this.client);
     this.hgetall = (0, _util.promisify)(this.client.hgetall).bind(this.client);
+    this.hlen = (0, _util.promisify)(this.client.hlen).bind(this.client);
+    this.hscan = (0, _util.promisify)(this.client.hscan).bind(this.client);
   }
 
   _createClass(RedisCacheManager, [{
@@ -42,8 +52,7 @@ function () {
       var _this = this;
 
       // TODO: remove stringify, could be done easily if we're sure the object is flat (no sub-object)
-      // eslint-disable-next-line array-callback-return
-      Object.keys(dataset).every(function (key) {
+      Object.keys(dataset).forEach(function (key) {
         _this.client.hset(_this.mainkey, key, JSON.stringify(dataset[key]));
       });
     }
@@ -136,6 +145,75 @@ function () {
       }
 
       return getAll;
+    }()
+  }, {
+    key: "iterate",
+    value: function () {
+      var _iterate = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(gapSize, callback) {
+        var len, cursor, i, res, _res, data, j;
+
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.next = 2;
+                return this.hlen(this.mainkey);
+
+              case 2:
+                len = _context3.sent;
+                cursor = 0;
+                i = 0;
+
+              case 5:
+                if (!(i < len)) {
+                  _context3.next = 23;
+                  break;
+                }
+
+                _context3.prev = 6;
+                _context3.next = 9;
+                return this.hscan(this.mainkey, cursor, 'COUNT', gapSize);
+
+              case 9:
+                res = _context3.sent;
+                _res = _slicedToArray(res, 1);
+                cursor = _res[0];
+                data = {};
+
+                for (j = 0; j < res[1].length; j += 2) {
+                  // TODO: remove parse, this is a terrible way of doing it, see above
+                  data[res[1][j]] = JSON.parse(res[1][j + 1]);
+                }
+
+                callback(null, data);
+                _context3.next = 20;
+                break;
+
+              case 17:
+                _context3.prev = 17;
+                _context3.t0 = _context3["catch"](6);
+                callback(_context3.t0, null);
+
+              case 20:
+                i += gapSize;
+                _context3.next = 5;
+                break;
+
+              case 23:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this, [[6, 17]]);
+      }));
+
+      function iterate(_x2, _x3) {
+        return _iterate.apply(this, arguments);
+      }
+
+      return iterate;
     }() // Note for later: leveraging redis zset would be amazing here to
     // iterate over logs sorted by blocknumber / timestamp.
 

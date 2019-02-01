@@ -2,7 +2,7 @@ import MemoryCacheManager from './MemoryCacheManager';
 
 function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   return new Promise((resolve, reject) => {
-    console.log(`Fetching logs from block ${fromBlock} to ${toBlock}`);
+    process.stdout.write(`Fetching logs from block ${fromBlock} to ${toBlock}: `);
 
     web3.eth.getPastLogs(
       {
@@ -20,8 +20,20 @@ function getLogsFromAddress(web3, address, fromBlock, toBlock) {
   });
 }
 
+function getBlockFactory(web3) {
+  const blockCache = {};
+  // memoize blocks
+  return async function f(blockNumber) {
+    if (!blockCache[blockNumber]) {
+      blockCache[blockNumber] = await web3.eth.getBlock(blockNumber);
+    }
+    return blockCache[blockNumber];
+  };
+}
+
 export async function cacheLogsForAddress(web3, address, cache, options) {
   const blockNumber = await web3.eth.getBlockNumber();
+  const getBlock = getBlockFactory(web3);
   const injectTimestamp = options && options.injectTimestamp ? options.injectTimestamp : false;
   const chunkSize = options && options.chunkSize ? options.chunkSize : 5000;
   let fromBlock = options && options.fromBlock ? options.fromBlock : 1;
@@ -35,6 +47,7 @@ export async function cacheLogsForAddress(web3, address, cache, options) {
     // we don't want getLogs to be parallelized to avoid hammering the node.
     // eslint-disable-next-line no-await-in-loop
     const currentLogs = await getLogsFromAddress(web3, address, block, nextBlock);
+    console.log(`${currentLogs.length} logs.`);
     // Inject timestamp to the logs, this is often useful for ordering or analysis
     let logs = currentLogs;
     if (injectTimestamp) {
@@ -42,7 +55,7 @@ export async function cacheLogsForAddress(web3, address, cache, options) {
       logs = await Promise.all(
         currentLogs.map(async log => ({
           ...log,
-          timestamp: (await web3.eth.getBlock(log.blockNumber)).timestamp,
+          timestamp: (await getBlock(log.blockNumber)).timestamp,
         })),
       );
     }

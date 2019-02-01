@@ -35,7 +35,7 @@ function () {
       var _this = this;
 
       // eslint-disable-next-line no-return-assign
-      Object.keys(dataset).every(function (key) {
+      Object.keys(dataset).forEach(function (key) {
         return _this.data[key] = dataset[key];
       });
     }

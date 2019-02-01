@@ -10,12 +10,13 @@ export default class RedisCacheManager {
     });
     this.hget = promisify(this.client.hget).bind(this.client);
     this.hgetall = promisify(this.client.hgetall).bind(this.client);
+    this.hlen = promisify(this.client.hlen).bind(this.client);
+    this.hscan = promisify(this.client.hscan).bind(this.client);
   }
 
   batchSet(dataset) {
     // TODO: remove stringify, could be done easily if we're sure the object is flat (no sub-object)
-    // eslint-disable-next-line array-callback-return
-    Object.keys(dataset).every((key) => {
+    Object.keys(dataset).forEach((key) => {
       this.client.hset(this.mainkey, key, JSON.stringify(dataset[key]));
     });
   }
@@ -50,6 +51,27 @@ export default class RedisCacheManager {
     // eslint-disable-next-line no-return-assign
     Object.keys(data).map(key => (data[key] = JSON.parse(data[key])));
     return data;
+  }
+
+  async iterate(gapSize, callback) {
+    const len = await this.hlen(this.mainkey);
+    let cursor = 0;
+
+    for (let i = 0; i < len; i += gapSize) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await this.hscan(this.mainkey, cursor, 'COUNT', gapSize);
+        [cursor] = res;
+        const data = {};
+        for (let j = 0; j < res[1].length; j += 2) {
+          // TODO: remove parse, this is a terrible way of doing it, see above
+          data[res[1][j]] = JSON.parse(res[1][j + 1]);
+        }
+        callback(null, data);
+      } catch (e) {
+        callback(e, null);
+      }
+    }
   }
 
   // Note for later: leveraging redis zset would be amazing here to
