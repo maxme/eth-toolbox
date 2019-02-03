@@ -1,33 +1,32 @@
-export default class MemoryCacheManager {
+import { ICachedData, ICache } from "./ICache";
+
+export default class MemoryCacheManager implements ICache {
+  data: ICachedData;
   constructor() {
     this.data = {};
   }
 
-  batchSet(dataset) {
+  batchSet(dataset: ICachedData) {
     // eslint-disable-next-line no-return-assign
     Object.keys(dataset).forEach(key => (this.data[key] = dataset[key]));
   }
 
-  set(key, data) {
+  set(key: string, data: any) {
     this.data[key] = data;
     if (data === null) {
       delete this.data[key];
     }
   }
 
-  get(key) {
+  get(key: string) {
     return this.data[key];
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  save() {
-    // noop
-  }
+  save() {}
+  close() {}
 
-  // eslint-disable-next-line class-methods-use-this
-  read() {
-    // noop
-  }
+  // TODO: implement this
+  iterate() {}
 
   async getAll() {
     return this.data;

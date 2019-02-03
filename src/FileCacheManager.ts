@@ -1,24 +1,27 @@
-import fs from 'fs';
+import fs from "fs";
+import { ICachedData, ICache } from "./ICache";
 
-export default class FileCacheManager {
-  constructor(filename) {
+export class FileCacheManager implements ICache {
+  filename: string;
+  data: ICachedData;
+  constructor(filename: string) {
     this.filename = filename;
     this.data = this.read();
   }
 
-  batchSet(dataset) {
+  batchSet(dataset: any) {
     // eslint-disable-next-line no-return-assign
-    Object.keys(dataset).forEach(key => (this.data[key] = dataset[key]));
+    Object.keys(dataset).forEach((key: string) => (this.data[key] = dataset[key]));
   }
 
-  set(key, data) {
+  set(key: string, data: any) {
     this.data[key] = data;
     if (data === null) {
       delete this.data[key];
     }
   }
 
-  get(key) {
+  get(key: string) {
     return this.data[key];
   }
 
@@ -30,8 +33,13 @@ export default class FileCacheManager {
     if (!fs.existsSync(this.filename)) {
       fs.writeFileSync(this.filename, JSON.stringify({}));
     }
-    return JSON.parse(fs.readFileSync(this.filename));
+    return JSON.parse(fs.readFileSync(this.filename).toString());
   }
+
+  close() {}
+
+  // TODO: implement this
+  iterate() {}
 
   async getAll() {
     return this.data;

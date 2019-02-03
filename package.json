@@ -8,14 +8,19 @@
   "main": "dist/index.js",
   "husky": {
     "hooks": {
-      "pre-commit": "yarn build && yarn lint"
+      "pre-commit": "yarn build"
     }
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
     "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.1",
     "@babel/preset-env": "^7.2.3",
+    "@babel/preset-typescript": "^7.1.0",
+    "@types/redis": "^2.8.10",
+    "@types/web3": "^1.0.18",
     "eslint": "^5.12.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
@@ -25,6 +30,8 @@
     "husky": "^1.3.1",
     "jest": "^19.0.2",
     "jest-cli": "^20.0.0",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.1",
     "web3": "^1.0.0-beta.37"
   },
   "license": "MIT",
@@ -32,15 +39,14 @@
     "dist"
   ],
   "scripts": {
-    "cli-test": "babel-node test/cli-test.js",
-    "build": "babel src -d dist",
+    "cli-test": "ts-node test/cli-test.ts",
     "test": "jest",
-    "lint": "eslint src",
-    "lint-fix": "yarn lint -- --fix",
     "clean": "del dist",
     "coverage": "yarn test -- --coverage",
-    "preversion": "yarn lint && yarn test && yarn build",
-    "prepublish": "yarn lint && yarn test && yarn build"
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "yarn run build:js",
+    "build:js": "tsc -p ."
   },
   "dependencies": {
     "redis": "^2.8.0"

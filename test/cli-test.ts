@@ -10,7 +10,7 @@ async function main() {
   // CK: 0x06012c8cf97bead5deae237070f9587f8e7a266d - start at block 4604731
   // fizzy: 0xe083515D1541F2a9Fd0ca03f189F5D321C73B872
   const address = '0x06012c8cf97bead5deae237070f9587f8e7a266d';
-  toolbox.setup(web3, { chunkSize: 1000, fromBlock: 4604731, injectTimestamp: false });
+  toolbox.setup(web3, { chunkSize: 1000, fromBlock: 7100000, injectTimestamp: false });
   const cache = new toolbox.cache.RedisCacheManager(address);
   // const cache = new toolbox.cache.FileCacheManager(address)
   try {
