@@ -9,7 +9,7 @@ class RedisCacheManager {
     constructor(mainkey, clientsOption) {
         this.mainkey = mainkey;
         this.client = redis_1.default.createClient(clientsOption);
-        this.client.on("error", err => {
+        this.client.on("error", (err) => {
             console.log(`Error ${err}`);
         });
         this.hget = util_1.promisify(this.client.hget).bind(this.client);
@@ -19,7 +19,7 @@ class RedisCacheManager {
     }
     batchSet(dataset) {
         // TODO: remove stringify, could be done easily if we're sure the object is flat (no sub-object)
-        Object.keys(dataset).forEach(key => {
+        Object.keys(dataset).forEach((key) => {
             this.client.hset(this.mainkey, key, JSON.stringify(dataset[key]));
         });
     }
@@ -31,28 +31,19 @@ class RedisCacheManager {
         const tmp = JSON.parse(await this.hget(this.mainkey, key));
         return tmp;
     }
-    // eslint-disable-next-line class-methods-use-this
-    save() {
-        // noop
-    }
-    // eslint-disable-next-line class-methods-use-this
-    read() {
-        // noop
-    }
+    // tslint:disable-next-line:no-empty
+    save() { }
     close() {
         this.client.quit();
     }
-    async getAll() {
-        // TODO: remove parse, this is a terrible way of doing it, see above
-        const data = await this.hgetall(this.mainkey);
-        // eslint-disable-next-line no-return-assign
-        Object.keys(data).map(key => (data[key] = JSON.parse(data[key])));
-        return data;
-    }
-    async iterate(gapSize, callback) {
+    async iterate(gapSize, callback, count) {
         const len = await this.hlen(this.mainkey);
         let cursor = "0";
-        for (let i = 0; i < len; i += gapSize) {
+        if (count === undefined) {
+            count = len;
+        }
+        gapSize = Math.min(gapSize, count);
+        for (let i = 0; i < Math.min(len, count); i += gapSize) {
             try {
                 const res = await this.hscan(this.mainkey, cursor, "COUNT", gapSize);
                 [cursor] = res;

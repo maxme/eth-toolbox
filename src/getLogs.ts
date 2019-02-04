@@ -1,28 +1,28 @@
 import Web3 from "web3";
+import { ICache, ICachedData } from "./ICache";
 import MemoryCacheManager from "./MemoryCacheManager";
-import { ICachedData, ICache } from "./ICache";
 
 function getLogsFromAddress(
   web3: Web3,
   address: string,
   fromBlock: number,
-  toBlock: number
-): Promise<Array<any>> {
+  toBlock: number,
+): Promise<any[]> {
   return new Promise((resolve, reject) => {
     process.stdout.write(`Fetching logs from block ${fromBlock} to ${toBlock}: `);
 
     web3.eth.getPastLogs(
       {
+        address,
         fromBlock,
         toBlock,
-        address
       },
       (err, logs) => {
         if (err) {
           return reject(err);
         }
         return resolve(logs);
-      }
+      },
     );
   });
 }
@@ -42,7 +42,7 @@ export async function cacheLogsForAddress(
   web3: Web3,
   address: string,
   cache: ICache,
-  options: any
+  options: any,
 ) {
   const blockNumber = await web3.eth.getBlockNumber();
   const getBlock = getBlockFactory(web3);
@@ -65,10 +65,10 @@ export async function cacheLogsForAddress(
     if (injectTimestamp) {
       // eslint-disable-next-line no-await-in-loop
       logs = await Promise.all(
-        currentLogs.map(async log => ({
+        currentLogs.map(async (log) => ({
           ...log,
-          timestamp: (await getBlock(log.blockNumber)).timestamp
-        }))
+          timestamp: (await getBlock(log.blockNumber)).timestamp,
+        })),
       );
     }
     const mappedLogs = logs.reduce((acc, e) => {
@@ -87,10 +87,9 @@ export async function cacheLogsForAddress(
 export default async function getAllLogsForAddress(
   web3: Web3,
   address: string,
-  _cache: ICache,
-  options: any
+  cache: ICache,
+  options: any,
 ) {
-  const cache = _cache || new MemoryCacheManager();
+  cache = cache || new MemoryCacheManager();
   await cacheLogsForAddress(web3, address, cache, options);
-  return cache.getAll();
 }

@@ -62,4 +62,5 @@ typings/
 
 *-logs.cache
 config.js
+config.ts
 *.rdb

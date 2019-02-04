@@ -7,6 +7,5 @@ export interface ICache {
   get(key: string): any;
   save(): void;
   close(): void;
-  getAll(): ICachedData;
-  iterate(gapSize: number, callback: (err: string | null, data: any) => void): void;
+  iterate(gapSize: number, callback: (err: string | null, data: any) => void, count?: number): void;
 }

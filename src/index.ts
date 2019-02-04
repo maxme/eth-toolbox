@@ -1,8 +1,8 @@
 import Web3 from "web3";
-import getAllLogsForAddress from "./getLogs";
 import { FileCacheManager } from "./FileCacheManager";
-import RedisCacheManager from "./RedisCacheManager";
+import getAllLogsForAddress from "./getLogs";
 import { ICache } from "./ICache";
+import RedisCacheManager from "./RedisCacheManager";
 
 declare var global: any;
 
@@ -22,7 +22,7 @@ function getAllLogsForAddressWeb3(address: string, cache: ICache) {
 }
 
 export default {
-  setup,
+  cache: { FileCacheManager, RedisCacheManager },
   logs: { getAllLogsForAddress: getAllLogsForAddressWeb3 },
-  cache: { FileCacheManager, RedisCacheManager }
+  setup,
 };

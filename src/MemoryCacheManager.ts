@@ -1,34 +1,43 @@
-import { ICachedData, ICache } from "./ICache";
+import { ICache, ICachedData } from "./ICache";
 
 export default class MemoryCacheManager implements ICache {
-  data: ICachedData;
+  public data: ICachedData;
   constructor() {
     this.data = {};
   }
 
-  batchSet(dataset: ICachedData) {
+  public batchSet(dataset: ICachedData) {
     // eslint-disable-next-line no-return-assign
-    Object.keys(dataset).forEach(key => (this.data[key] = dataset[key]));
+    Object.keys(dataset).forEach((key) => (this.data[key] = dataset[key]));
   }
 
-  set(key: string, data: any) {
+  public set(key: string, data: any) {
     this.data[key] = data;
     if (data === null) {
       delete this.data[key];
     }
   }
 
-  get(key: string) {
+  public get(key: string) {
     return this.data[key];
   }
 
-  save() {}
-  close() {}
+  // tslint:disable-next-line:no-empty
+  public save() {}
 
-  // TODO: implement this
-  iterate() {}
+  // tslint:disable-next-line:no-empty
+  public close() {}
 
-  async getAll() {
+  // TODO: implement this by accounting for gap/count
+  public async iterate(
+    gapSize: number,
+    callback: (err: string | null, data: any) => void,
+    count?: number,
+  ) {
+    callback(null, this.data);
+  }
+
+  public async getAll() {
     return this.data;
   }
 }

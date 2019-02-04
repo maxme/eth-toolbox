@@ -1,47 +1,50 @@
 import fs from "fs";
-import { ICachedData, ICache } from "./ICache";
+import { ICache, ICachedData } from "./ICache";
 
 export class FileCacheManager implements ICache {
-  filename: string;
-  data: ICachedData;
+  public filename: string;
+  public data: ICachedData;
   constructor(filename: string) {
     this.filename = filename;
     this.data = this.read();
   }
 
-  batchSet(dataset: any) {
+  public batchSet(dataset: any) {
     // eslint-disable-next-line no-return-assign
     Object.keys(dataset).forEach((key: string) => (this.data[key] = dataset[key]));
   }
 
-  set(key: string, data: any) {
+  public set(key: string, data: any) {
     this.data[key] = data;
     if (data === null) {
       delete this.data[key];
     }
   }
 
-  get(key: string) {
+  public get(key: string) {
     return this.data[key];
   }
 
-  save() {
+  public save() {
     fs.writeFileSync(this.filename, JSON.stringify(this.data));
   }
 
-  read() {
+  public read() {
     if (!fs.existsSync(this.filename)) {
       fs.writeFileSync(this.filename, JSON.stringify({}));
     }
     return JSON.parse(fs.readFileSync(this.filename).toString());
   }
 
-  close() {}
+  // tslint:disable-next-line:no-empty
+  public close() {}
 
-  // TODO: implement this
-  iterate() {}
-
-  async getAll() {
-    return this.data;
+  // TODO: implement this by accounting for gap/count
+  public async iterate(
+    gapSize: number,
+    callback: (err: string | null, data: any) => void,
+    count?: number,
+  ) {
+    callback(null, this.data);
   }
 }

@@ -8,9 +8,9 @@ function getLogsFromAddress(web3, address, fromBlock, toBlock) {
     return new Promise((resolve, reject) => {
         process.stdout.write(`Fetching logs from block ${fromBlock} to ${toBlock}: `);
         web3.eth.getPastLogs({
+            address,
             fromBlock,
             toBlock,
-            address
         }, (err, logs) => {
             if (err) {
                 return reject(err);
@@ -52,7 +52,7 @@ async function cacheLogsForAddress(web3, address, cache, options) {
             // eslint-disable-next-line no-await-in-loop
             logs = await Promise.all(currentLogs.map(async (log) => ({
                 ...log,
-                timestamp: (await getBlock(log.blockNumber)).timestamp
+                timestamp: (await getBlock(log.blockNumber)).timestamp,
             })));
         }
         const mappedLogs = logs.reduce((acc, e) => {
@@ -68,9 +68,8 @@ async function cacheLogsForAddress(web3, address, cache, options) {
     cache.save();
 }
 exports.cacheLogsForAddress = cacheLogsForAddress;
-async function getAllLogsForAddress(web3, address, _cache, options) {
-    const cache = _cache || new MemoryCacheManager_1.default();
+async function getAllLogsForAddress(web3, address, cache, options) {
+    cache = cache || new MemoryCacheManager_1.default();
     await cacheLogsForAddress(web3, address, cache, options);
-    return cache.getAll();
 }
 exports.default = getAllLogsForAddress;

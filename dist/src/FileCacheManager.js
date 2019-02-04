@@ -31,11 +31,11 @@ class FileCacheManager {
         }
         return JSON.parse(fs_1.default.readFileSync(this.filename).toString());
     }
+    // tslint:disable-next-line:no-empty
     close() { }
-    // TODO: implement this
-    iterate() { }
-    async getAll() {
-        return this.data;
+    // TODO: implement this by accounting for gap/count
+    async iterate(gapSize, callback, count) {
+        callback(null, this.data);
     }
 }
 exports.FileCacheManager = FileCacheManager;

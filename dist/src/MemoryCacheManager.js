@@ -6,7 +6,7 @@ class MemoryCacheManager {
     }
     batchSet(dataset) {
         // eslint-disable-next-line no-return-assign
-        Object.keys(dataset).forEach(key => (this.data[key] = dataset[key]));
+        Object.keys(dataset).forEach((key) => (this.data[key] = dataset[key]));
     }
     set(key, data) {
         this.data[key] = data;
@@ -17,10 +17,14 @@ class MemoryCacheManager {
     get(key) {
         return this.data[key];
     }
+    // tslint:disable-next-line:no-empty
     save() { }
+    // tslint:disable-next-line:no-empty
     close() { }
-    // TODO: implement this
-    iterate() { }
+    // TODO: implement this by accounting for gap/count
+    async iterate(gapSize, callback, count) {
+        callback(null, this.data);
+    }
     async getAll() {
         return this.data;
     }
